@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BIMfabrik Asset Viewer</title>
+  <meta name="description" content="Browse GLB assets from GitHub repositories and copy exact AI-development references." />
+  <script type="module" src="https://unpkg.com/@google/model-viewer@4.3.1/dist/model-viewer.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0d0f12;--panel:#15181d;--panel2:#1c2026;--line:#303641;--text:#f4f6f8;--muted:#9aa4b2;--accent:#ffcf00;--danger:#ff7b72}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}.top{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:rgba(13,15,18,.96);backdrop-filter:blur(12px)}.wrap{width:min(1500px,calc(100% - 28px));margin:auto}.topin{display:flex;align-items:center;gap:14px;min-height:58px}.logo{width:28px;height:28px;display:grid;place-items:center;background:var(--accent);color:#111;font-weight:900;border-radius:4px}.brand strong{display:block}.brand span,.muted{color:var(--muted)}.hero{padding:28px 0 18px}.hero h1{margin:0 0 7px;font-size:clamp(24px,4vw,42px);letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);max-width:850px}.controls{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.field{display:grid;gap:6px}.field label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}input,textarea,select{width:100%;border:1px solid var(--line);background:#0f1216;color:var(--text);border-radius:7px;padding:10px 11px;outline:none}textarea{min-height:76px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--accent)}.actions{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:9px 12px;border-radius:7px;font-weight:700}.btn.primary{background:var(--accent);border-color:var(--accent);color:#151515}.btn:hover{filter:brightness(1.08)}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px 0}.toolbar input{max-width:420px}.toolbar select{width:auto;min-width:210px}.status{margin-left:auto;color:var(--muted)}.notice{margin:12px 0;padding:11px 13px;border:1px solid var(--line);background:var(--panel);border-radius:8px;color:var(--muted)}.notice.error{border-color:#6b3030;color:#ffaaa3}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding-bottom:60px}.card{overflow:hidden;border:1px solid var(--line);background:var(--panel);border-radius:10px;transition:border-color .15s,transform .15s}.card:hover{border-color:#4b5563}.card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}model-viewer{display:block;width:100%;height:270px;background:radial-gradient(circle at 50% 42%,#29303a,#111419 70%);--poster-color:transparent}.meta{padding:12px}.name{font-size:16px;font-weight:800;overflow-wrap:anywhere}.path{margin-top:4px;color:var(--muted);font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}.facts{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0}.chip{border:1px solid var(--line);border-radius:999px;padding:3px 7px;color:var(--muted);font-size:11px}.cardactions{display:flex;gap:7px;flex-wrap:wrap}.cardactions .btn{font-size:12px;padding:7px 9px}.empty{padding:50px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}.taskrow{display:grid;grid-template-columns:1fr auto;gap:8px}.security{font-size:12px;color:var(--muted);margin-top:6px}.security strong{color:var(--text)}@media(max-width:850px){.controls{grid-template-columns:1fr}.status{width:100%;margin:0}.toolbar input,.toolbar select{max-width:none;width:100%}.grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.grid{grid-template-columns:1fr}.wrap{width:min(100% - 18px,1500px)}model-viewer{height:300px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="wrap topin"><div class="logo">AV</div><div class="brand"><strong>BIMfabrik Asset Viewer</strong><span>GLB development browser</span></div></div></header>
+  <main class="wrap">
+    <section class="hero"><h1>See every GLB. Reference the exact asset.</h1><p>Scan GitHub repositories for <code>assets/**/*.glb</code>, inspect them side-by-side in 3D, then copy a deep link or a complete AI task with the repository, branch, path and blob SHA.</p></section>
+    <section class="controls">
+      <div class="field"><label for="repos">Repositories</label><textarea id="repos">BIMfabrik/game_Buggy@main
+BIMfabrik/scargada@main</textarea><div class="security">One per line. Format: <strong>owner/repo@branch</strong>.</div></div>
+      <div class="field"><label for="token">GitHub token for private repos</label><input id="token" type="password" autocomplete="off" placeholder="github_pat_… or ghp_…" /><div class="security">Stored only in this browser tab using <strong>sessionStorage</strong>. Never added to links.</div></div>
+      <div class="field"><label for="task">AI change instruction</label><input id="task" value="Change this asset to red colour." /><div class="actions"><button id="scan" class="btn primary">Scan GLB assets</button><button id="clearToken" class="btn">Clear token</button></div></div>
+    </section>
+    <div id="notice" class="notice">Ready. Enter a read-only token because the two default game repositories are private, then click <strong>Scan GLB assets</strong>.</div>
+    <section class="toolbar"><input id="search" type="search" placeholder="Search asset name or path…" /><select id="filter"><option value="all">All repositories</option></select><span id="status" class="status">0 assets</span></section>
+    <section id="grid" class="grid"><div class="empty">No assets loaded yet.</div></section>
+  </main>
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const els = { repos:$('#repos'), token:$('#token'), task:$('#task'), scan:$('#scan'), clearToken:$('#clearToken'), notice:$('#notice'), search:$('#search'), filter:$('#filter'), status:$('#status'), grid:$('#grid') };
+  let assets = [];
+  let selectedKey = '';
+  const modelUrls = new Map();
+  let observer;
+  els.token.value = sessionStorage.getItem('assetviewer.githubToken') || '';
+
+  const authHeaders = (raw=false) => {
+    const h = { 'Accept': raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' };
+    const token = els.token.value.trim();
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
+  const api = async (url, raw=false) => {
+    const r = await fetch(url, { headers: authHeaders(raw), cache:'no-store' });
+    if (!r.ok) {
+      let message = `${r.status} ${r.statusText}`;
+      try { const j = await r.json(); if (j.message) message += ` — ${j.message}`; } catch (_) {}
+      throw new Error(message);
+    }
+    return r;
+  };
+  const parseRepo = (line) => {
+    const value = line.trim();
+    if (!value) return null;
+    const at = value.lastIndexOf('@');
+    return at > value.indexOf('/') ? { repo:value.slice(0,at), ref:value.slice(at+1) || 'main' } : { repo:value, ref:'main' };
+  };
+  const keyFor = (a) => `${a.repo}@${a.ref}:${a.path}`;
+  const encPath = (p) => p.split('/').map(encodeURIComponent).join('/');
+  const humanSize = (n) => n >= 1048576 ? `${(n/1048576).toFixed(1)} MB` : `${Math.max(1,Math.round(n/1024))} KB`;
+  const sourceUrl = (a) => `https://github.com/${a.repo}/blob/${encodeURIComponent(a.ref)}/${a.path.split('/').map(encodeURIComponent).join('/')}`;
+  const deepLink = (a) => {
+    const u = new URL(location.href); u.search=''; u.hash='';
+    u.searchParams.set('repo',a.repo); u.searchParams.set('ref',a.ref); u.searchParams.set('path',a.path);
+    return u.toString();
+  };
+  const setNotice = (text, error=false) => { els.notice.textContent=text; els.notice.classList.toggle('error',error); };
+  const copy = async (text, button) => {
+    await navigator.clipboard.writeText(text);
+    const old = button.textContent; button.textContent='Copied'; setTimeout(()=>button.textContent=old,900);
+  };
+  const aiPrompt = (a) => `${els.task.value.trim() || 'Modify this asset.'}\n\nAsset reference:\nViewer: ${deepLink(a)}\nRepository: https://github.com/${a.repo}\nBranch: ${a.ref}\nAsset path: ${a.path}\nGit blob SHA: ${a.sha}\nSource page: ${sourceUrl(a)}\n\nPlease modify the actual source asset/workflow in this repository, re-export the GLB at the same path, and keep the game integration working. If a Blender source or generation script exists, update that too so the change is reproducible.`;
+
+  async function scanRepo(spec) {
+    const url = `https://api.github.com/repos/${spec.repo}/git/trees/${encodeURIComponent(spec.ref)}?recursive=1`;
+    const r = await api(url); const data = await r.json();
+    if (data.truncated) throw new Error(`${spec.repo}: Git tree was truncated`);
+    return (data.tree || []).filter(x => x.type==='blob' && x.path.startsWith('assets/') && x.path.toLowerCase().endsWith('.glb')).map(x => ({ repo:spec.repo, ref:spec.ref, path:x.path, name:x.path.split('/').pop(), sha:x.sha, size:x.size || 0 }));
+  }
+  async function scan() {
+    const specs = els.repos.value.split(/\n+/).map(parseRepo).filter(Boolean);
+    if (!specs.length) return setNotice('Add at least one repository.',true);
+    sessionStorage.setItem('assetviewer.githubToken', els.token.value.trim());
+    els.scan.disabled=true; els.scan.textContent='Scanning…'; setNotice(`Scanning ${specs.length} repositories…`);
+    for (const url of modelUrls.values()) URL.revokeObjectURL(url); modelUrls.clear();
+    try {
+      const results = await Promise.allSettled(specs.map(scanRepo));
+      assets = results.flatMap(r => r.status==='fulfilled' ? r.value : []);
+      assets.sort((a,b)=>a.repo.localeCompare(b.repo)||a.path.localeCompare(b.path));
+      const failures = results.filter(r=>r.status==='rejected');
+      rebuildFilter(); selectFromUrl(); render();
+      setNotice(failures.length ? `Loaded ${assets.length} GLB assets. ${failures.length} repository scan failed: ${failures.map(f=>f.reason.message).join(' | ')}` : `Loaded ${assets.length} GLB assets from ${specs.length} repositories.`, !!failures.length);
+    } catch (e) { setNotice(e.message,true); }
+    finally { els.scan.disabled=false; els.scan.textContent='Scan GLB assets'; }
+  }
+  function rebuildFilter() {
+    const current=els.filter.value; els.filter.innerHTML='<option value="all">All repositories</option>';
+    [...new Set(assets.map(a=>a.repo))].forEach(repo=>{ const o=document.createElement('option');o.value=repo;o.textContent=repo;els.filter.append(o); });
+    if ([...els.filter.options].some(o=>o.value===current)) els.filter.value=current;
+  }
+  function selectFromUrl() {
+    const p=new URLSearchParams(location.search), repo=p.get('repo'), ref=p.get('ref')||'main', path=p.get('path');
+    if (repo && path) { const a=assets.find(x=>x.repo===repo&&x.ref===ref&&x.path===path); if(a) selectedKey=keyFor(a); }
+  }
+  async function loadModel(a, model) {
+    const key=keyFor(a); if (model.dataset.loaded) return; model.dataset.loaded='1';
+    if (modelUrls.has(key)) { model.src=modelUrls.get(key); return; }
+    try {
+      const url=`https://api.github.com/repos/${a.repo}/contents/${encPath(a.path)}?ref=${encodeURIComponent(a.ref)}`;
+      const r=await api(url,true); const blob=new Blob([await r.arrayBuffer()],{type:'model/gltf-binary'}); const objectUrl=URL.createObjectURL(blob); modelUrls.set(key,objectUrl); model.src=objectUrl;
+    } catch(e) { model.innerHTML=`<div style="padding:20px;color:#ffaaa3">Load failed: ${e.message}</div>`; }
+  }
+  function selectAsset(a) {
+    selectedKey=keyFor(a); const u=new URL(deepLink(a)); history.replaceState(null,'',u); render();
+    requestAnimationFrame(()=>document.querySelector('.card.selected')?.scrollIntoView({block:'center',behavior:'smooth'}));
+  }
+  function makeCard(a) {
+    const card=document.createElement('article'); card.className='card'+(keyFor(a)===selectedKey?' selected':'');
+    const model=document.createElement('model-viewer'); model.setAttribute('camera-controls',''); model.setAttribute('shadow-intensity','1'); model.setAttribute('environment-image','neutral'); model.setAttribute('touch-action','pan-y'); model.setAttribute('alt',a.name);
+    const meta=document.createElement('div'); meta.className='meta';
+    const name=document.createElement('div'); name.className='name'; name.textContent=a.name;
+    const path=document.createElement('div'); path.className='path'; path.textContent=`${a.repo}@${a.ref} / ${a.path}`;
+    const facts=document.createElement('div'); facts.className='facts'; facts.innerHTML=`<span class="chip">${humanSize(a.size)}</span><span class="chip">${a.sha.slice(0,10)}</span>`;
+    const acts=document.createElement('div'); acts.className='cardactions';
+    const select=document.createElement('button'); select.className='btn'; select.textContent='Select'; select.onclick=()=>selectAsset(a);
+    const link=document.createElement('button'); link.className='btn'; link.textContent='Copy link'; link.onclick=()=>copy(deepLink(a),link);
+    const ai=document.createElement('button'); ai.className='btn primary'; ai.textContent='Copy AI task'; ai.onclick=()=>copy(aiPrompt(a),ai);
+    const source=document.createElement('a'); source.className='btn'; source.textContent='GitHub'; source.href=sourceUrl(a); source.target='_blank'; source.rel='noreferrer';
+    acts.append(select,link,ai,source); meta.append(name,path,facts,acts); card.append(model,meta);
+    observer.observe(model); model.__asset=a; return card;
+  }
+  function render() {
+    observer?.disconnect(); observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){observer.unobserve(e.target);loadModel(e.target.__asset,e.target);}}),{rootMargin:'350px'});
+    const q=els.search.value.trim().toLowerCase(), repo=els.filter.value;
+    const shown=assets.filter(a=>(repo==='all'||a.repo===repo)&&(!q||`${a.name} ${a.path} ${a.repo}`.toLowerCase().includes(q)));
+    els.grid.innerHTML=''; shown.forEach(a=>els.grid.append(makeCard(a))); if(!shown.length) els.grid.innerHTML='<div class="empty">No matching GLB assets.</div>';
+    els.status.textContent=`${shown.length} shown / ${assets.length} total`;
+  }
+  els.scan.addEventListener('click',scan); els.search.addEventListener('input',render); els.filter.addEventListener('change',render);
+  els.clearToken.addEventListener('click',()=>{els.token.value='';sessionStorage.removeItem('assetviewer.githubToken');setNotice('GitHub token cleared from this tab.');});
+  const initial=new URLSearchParams(location.search); const initialRepo=initial.get('repo'); const initialRef=initial.get('ref')||'main';
+  if(initialRepo && !els.repos.value.includes(initialRepo)) els.repos.value += `\n${initialRepo}@${initialRef}`;
+  if(els.token.value) scan();
+})();
+</script>
+</body>
+</html>
